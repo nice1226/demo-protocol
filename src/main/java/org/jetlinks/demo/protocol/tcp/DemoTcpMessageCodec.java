@@ -27,7 +27,6 @@ import java.util.Arrays;
 @Slf4j
 public class DemoTcpMessageCodec implements DeviceMessageCodec {
 
-    private DeviceRegistry registry;
 
     @Override
     public Transport getSupportTransport() {
@@ -37,6 +36,7 @@ public class DemoTcpMessageCodec implements DeviceMessageCodec {
     @Override
     @SneakyThrows
     public Mono<DeviceMessage> decode(MessageDecodeContext context) {
+        log.debug("收到消息：");
         return Mono.defer(() -> {
             FromDeviceMessageContext ctx = ((FromDeviceMessageContext) context);
             ByteBuf byteBuf = context.getMessage().getPayload();
@@ -66,7 +66,7 @@ public class DemoTcpMessageCodec implements DeviceMessageCodec {
                 }
                 AuthRequest request = ((AuthRequest) message.getData());
                 String deviceId = buildDeviceId(request.getDeviceId());
-                return registry
+                return context
                         .getDevice(buildDeviceId(request.getDeviceId()))
                         .flatMap(operator -> operator.getConfig("tcp_auth_key")
                                 .map(Value::asString)
